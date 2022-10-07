@@ -27,7 +27,7 @@ func (ic *deployCmd) Create() *cobra.Command {
 }
 
 func (cmd *deployCmd) Execute(ctx context.Context, args []string) error {
-	action, err := actions.ProvideDeployAction()
+	action, err := actions.InjectDeployAction()
 	if err != nil {
 		return err
 	}

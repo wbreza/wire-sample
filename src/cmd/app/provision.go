@@ -30,7 +30,7 @@ func (ic *provisionCmd) Create() *cobra.Command {
 }
 
 func (ic *provisionCmd) Execute(ctx context.Context, args []string) error {
-	action, err := actions.ProvideProvisionAction(ic.provider, args)
+	action, err := actions.InjectProvisionAction(ic.provider, args)
 	if err != nil {
 		return err
 	}

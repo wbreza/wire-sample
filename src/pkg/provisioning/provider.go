@@ -10,7 +10,7 @@ import (
 
 var providers map[string]RegistrationFunc = map[string]RegistrationFunc{}
 
-type RegistrationFunc func(args ...any) Provider
+type RegistrationFunc func(args ...any) (Provider, error)
 
 type Provider interface {
 	Provision(ctx context.Context) error
@@ -26,9 +26,10 @@ func NewProvider(config *config.Config, providerName string, args ...any) (Provi
 		return nil, fmt.Errorf("unknown provider type '%s'", providerName)
 	}
 
-	return providerFunc(args), nil
-}
+	provider, err := providerFunc(args)
+	if err != nil {
+		return nil, err
+	}
 
-func Register(providerName string, registrationFunc RegistrationFunc) {
-	providers[providerName] = registrationFunc
+	return provider, nil
 }

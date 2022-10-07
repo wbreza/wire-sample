@@ -31,7 +31,7 @@ func (ic *initCmd) Create() *cobra.Command {
 }
 
 func (cmd *initCmd) Execute(ctx context.Context, args []string) error {
-	action, err := actions.ProvideInitAction(cmd.template)
+	action, err := actions.InjectInitAction(cmd.template)
 	if err != nil {
 		return err
 	}

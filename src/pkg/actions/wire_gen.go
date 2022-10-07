@@ -7,21 +7,37 @@
 package actions
 
 import (
+	"github.com/google/wire"
 	"github.com/wbreza/wire-sample/pkg/config"
+	"github.com/wbreza/wire-sample/pkg/exec"
 	"github.com/wbreza/wire-sample/pkg/provisioning"
+	"github.com/wbreza/wire-sample/pkg/tools"
 	"github.com/wbreza/wire-sample/pkg/tools/az"
 )
 
 // Injectors from wire.go:
 
-func ProvideInitAction(template string) (Action, error) {
-	cli := az.NewCli()
-	action := NewInitAction(template, cli)
+func InjectInitAction(template string) (Action, error) {
+	actionsInitOptions := initOptions{
+		template: template,
+	}
+	commandRunner := exec.NewShellCommandRunner()
+	userAgent, err := tools.InjectUserAgent()
+	if err != nil {
+		return nil, err
+	}
+	cli := az.NewCli(commandRunner, userAgent)
+	action := NewInitAction(actionsInitOptions, cli)
 	return action, nil
 }
 
-func ProvideDeployAction() (Action, error) {
-	cli := az.NewCli()
+func InjectDeployAction() (Action, error) {
+	commandRunner := exec.NewShellCommandRunner()
+	userAgent, err := tools.InjectUserAgent()
+	if err != nil {
+		return nil, err
+	}
+	cli := az.NewCli(commandRunner, userAgent)
 	configConfig, err := config.Load()
 	if err != nil {
 		return nil, err
@@ -30,7 +46,10 @@ func ProvideDeployAction() (Action, error) {
 	return action, nil
 }
 
-func ProvideProvisionAction(providerName string, args ...any) (Action, error) {
+func InjectProvisionAction(providerName string, args ...any) (Action, error) {
+	actionsProvisionOptions := provisionOptions{
+		provider: providerName,
+	}
 	configConfig, err := config.Load()
 	if err != nil {
 		return nil, err
@@ -39,6 +58,17 @@ func ProvideProvisionAction(providerName string, args ...any) (Action, error) {
 	if err != nil {
 		return nil, err
 	}
-	action := NewProvisionAction(provider)
+	commandRunner := exec.NewShellCommandRunner()
+	userAgent, err := tools.InjectUserAgent()
+	if err != nil {
+		return nil, err
+	}
+	cli := az.NewCli(commandRunner, userAgent)
+	manager := provisioning.NewManager(provider, cli)
+	action := NewProvisionAction(actionsProvisionOptions, manager)
 	return action, nil
 }
+
+// wire.go:
+
+var commonSet = wire.NewSet(provisioning.ProviderSet)

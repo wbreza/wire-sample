@@ -7,17 +7,27 @@ import (
 )
 
 type provisionAction struct {
-	provider provisioning.Provider
+	manager *provisioning.Manager
+	options provisionOptions
 }
 
-func NewProvisionAction(provider provisioning.Provider) Action {
+type provisionOptions struct {
+	provider  string
+	overwrite bool
+}
+
+func NewProvisionAction(options provisionOptions, manager *provisioning.Manager) Action {
 	return &provisionAction{
-		provider: provider,
+		manager: manager,
+		options: options,
 	}
 }
 
 func (a *provisionAction) Execute(ctx context.Context) error {
-	err := a.provider.Provision(ctx)
+	deployOptions := provisioning.DeployOptions{
+		Overwrite: true,
+	}
+	err := a.manager.Deploy(ctx, &deployOptions)
 	if err != nil {
 		return err
 	}

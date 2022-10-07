@@ -8,19 +8,23 @@ import (
 )
 
 type initAction struct {
-	template string
-	azCli    *az.Cli
+	azCli   *az.Cli
+	options initOptions
 }
 
-func NewInitAction(template string, azCli *az.Cli) Action {
+type initOptions struct {
+	template string
+}
+
+func NewInitAction(options initOptions, azCli *az.Cli) Action {
 	return &initAction{
-		template: template,
-		azCli:    azCli,
+		options: options,
+		azCli:   azCli,
 	}
 }
 
 func (a *initAction) Execute(ctx context.Context) error {
-	fmt.Printf("Initializing with template '%s'\n", a.template)
+	fmt.Printf("Initializing with template '%s'\n", a.options.template)
 
 	accounts, err := a.azCli.GetAccounts()
 	if err != nil {

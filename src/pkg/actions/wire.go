@@ -5,22 +5,22 @@ package actions
 
 import (
 	"github.com/google/wire"
-	"github.com/wbreza/wire-sample/pkg/config"
 	"github.com/wbreza/wire-sample/pkg/provisioning"
-	"github.com/wbreza/wire-sample/pkg/tools/az"
 )
 
-func ProvideInitAction(template string) (Action, error) {
-	wire.Build(NewInitAction, az.NewCli)
+var commonSet = wire.NewSet(provisioning.ProviderSet)
+
+func InjectInitAction(template string) (Action, error) {
+	wire.Build(NewInitAction, commonSet, wire.Struct(new(initOptions), "template"))
 	return &initAction{}, nil
 }
 
-func ProvideDeployAction() (Action, error) {
-	wire.Build(NewDeployAction, az.NewCli, config.Load)
+func InjectDeployAction() (Action, error) {
+	wire.Build(NewDeployAction, commonSet)
 	return &deployAction{}, nil
 }
 
-func ProvideProvisionAction(providerName string, args ...any) (Action, error) {
-	wire.Build(NewProvisionAction, provisioning.NewProvider, config.Load)
+func InjectProvisionAction(providerName string, args ...any) (Action, error) {
+	wire.Build(NewProvisionAction, commonSet, wire.Struct(new(provisionOptions), "provider"))
 	return &provisionAction{}, nil
 }

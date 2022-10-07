@@ -8,15 +8,20 @@ import (
 )
 
 type terraformProvider struct {
+	cli *Cli
+}
+
+func NewTerraformProvider(cli *Cli) provisioning.Provider {
+	return &terraformProvider{
+		cli: cli,
+	}
 }
 
 func (p *terraformProvider) Provision(context.Context) error {
 	fmt.Println("Provisioning with terraform...")
-	return nil
-}
+	p.cli.TerraformFunc1()
+	p.cli.TerraformFunc2()
+	p.cli.TerraformFunc3()
 
-func Register() {
-	provisioning.Register("terraform", func(args ...any) provisioning.Provider {
-		return &terraformProvider{}
-	})
+	return nil
 }
